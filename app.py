@@ -14,7 +14,7 @@ root.title("Image Classifier")
 
 # GUI start configuration
 # set image label with default image
-default_img = ImageTk.PhotoImage(Image.open("/Users/denniskollmann/Desktop/CPF_AI/Classification_App/CP-Factory_AI/bild1.png"))
+default_img = ImageTk.PhotoImage(Image.open("/Users/denniskollmann/Desktop/CPF_AI/Classification_App/CP-Factory_AI/default_img.png"))
 image_label = tk.Label(root, image=default_img)
 image_label.pack(side="top")
 # text label for predicted class

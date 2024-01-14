@@ -1,7 +1,7 @@
 from PIL import Image
 import io
 import requests
-import tflite_runtime.interpreter as tflite
+import tensorflow as tf
 import numpy as np
 
 
@@ -32,15 +32,14 @@ class ImageClassifier:
     
     def process_image(self):
         '''
-        Preprocess image data to prepare it for further processing.
+        Preprocess image data to prepare it for the ML-model.
         '''
         img = Image.open(io.BytesIO(self.new_img)).convert("RGB")
         # Resize
         img = img.resize((224, 224))
-        # Convert the image to a NumPy array
-        img_array = np.array(img)
-        # Add an additional dimension to represent batch size (1 in this case)
-        img_array = np.expand_dims(img_array, axis=0)
+        # Change to array object that contains the rgb values for each pixel
+        img_array = tf.keras.utils.img_to_array(img)
+        img_array = tf.expand_dims(img_array, 0)
         return img_array
     
     def predict_class(self):
@@ -53,7 +52,7 @@ class ImageClassifier:
         class_names = ['gummibaer', 'handyschale', 'handyschale_falsch', 'handyschale_umgedreht', 'leer', 'schokolade']
         TF_MODEL_FILE_PATH = '/Users/denniskollmann/Desktop/CPF_AI/Classification_App/CP-Factory_AI/backend/models/cpf_new_full.tflite'
         # Load the TFLite model and allocate tensors.
-        interpreter = tflite.Interpreter(model_path=TF_MODEL_FILE_PATH)
+        interpreter = tf.lite.Interpreter(model_path=TF_MODEL_FILE_PATH)
         interpreter.allocate_tensors()
         # Get input and output tensors.
         input_details = interpreter.get_input_details()
@@ -66,23 +65,11 @@ class ImageClassifier:
 
         # The function `get_tensor()` returns a copy of the tensor data.
         # Use `tensor()` in order to get a pointer to the tensor.
-        
         output_data = interpreter.get_tensor(output_details[0]['index'])
-        # print(output_data)
-        
-        
-        score = output_data
+        print(output_data)
+        score = tf.nn.softmax(output_data)
 
         class_name = class_names[np.argmax(score)]
-        
-        
-        
-        
-        
-        
-        # score = tf.nn.softmax(output_data)
-
-        # class_name = class_names[np.argmax(score)]
         
         self.current_img = self.new_img
         self.new_img = None
